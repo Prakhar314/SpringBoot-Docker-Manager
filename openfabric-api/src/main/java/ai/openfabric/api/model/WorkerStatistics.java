@@ -1,47 +1,33 @@
 package ai.openfabric.api.model;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
-import java.io.Serializable;
 
+@Getter
+@Setter
+@Builder
 @Entity()
-public class WorkerStatistics extends Datable implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class WorkerStatistics extends Datable{
 
     @Id
-    @Getter
-    @Setter
     @Column(name = "worker_id")
     private String id;
 
-    @Getter
-    @Setter
     private float cpuUsage;
-    @Getter
-    @Setter
     private float memoryUsage;
-
-    @Getter
-    @Setter
     private float networkIn;
-    @Getter
-    @Setter
     private float networkOut;
-
-    @Getter
-    @Setter
     private float blockIn;
-    @Getter
-    @Setter
     private float blockOut;
-
-    @Getter
-    @Setter
     private int pidCount;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "worker_id")
+    @JsonIgnore
     private Worker worker;
 }
