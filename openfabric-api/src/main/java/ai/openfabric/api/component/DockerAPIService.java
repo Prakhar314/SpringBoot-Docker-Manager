@@ -1,38 +1,38 @@
-package ai.openfabric.api.common;
+package ai.openfabric.api.component;
 
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import io.github.cdimascio.dotenv.Dotenv;
+import org.springframework.stereotype.Component;
 
-public class DockerEngineAPI {
+import javax.annotation.PostConstruct;
+import java.time.Duration;
 
-    private final DockerHttpClient httpClient;
+@Component
+public class DockerAPIService {
 
-    private DockerEngineAPI() {
+    private static DockerAPIService instance;
+    private DockerHttpClient httpClient;
+
+    @PostConstruct
+    public void init() {
+        Dotenv dotenv = Dotenv.load();
         DefaultDockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                .withDockerHost("tcp://localhost:2375")
-                .build();
+                .withDockerHost(
+                        dotenv.get("DOCKER_HOST", "tcp://localhost:2375")
+                ).build();
 
         httpClient = new ApacheDockerHttpClient.Builder()
                 .dockerHost(config.getDockerHost())
+                .connectionTimeout(Duration.ofSeconds(5))
+                .responseTimeout(Duration.ofSeconds(5))
                 .build();
-    }
-
-    public static DockerEngineAPI getInstance() {
-        return new DockerEngineAPI();
-    }
-
-    public DockerHttpClient getHttpClient() {
-        return httpClient;
     }
 
     private DockerHttpClient.Response execute(String endpoint, DockerHttpClient.Request.Method method) {
-        DockerHttpClient.Request request = DockerHttpClient.Request.builder()
-                .method(method)
-                .path(endpoint)
-                .build();
-        DockerHttpClient.Response response = httpClient.execute(request);
-        return response;
+        DockerHttpClient.Request request = DockerHttpClient.Request.builder().method(method).path(endpoint).build();
+        return httpClient.execute(request);
     }
 
     public DockerHttpClient.Response get(String endpoint) {

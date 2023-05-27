@@ -24,6 +24,13 @@ public class SwaggerConfig implements WebMvcConfigurer {
     @Value("${node.api.path}")
     private String REST_API_PREFIX;
 
+    private static ApiInfo getApiInfo() {
+        return new ApiInfoBuilder()
+                .title("Openfabric")
+                .version("v1")
+                .build();
+    }
+
     @Bean
     public Docket restApi() {
 
@@ -42,13 +49,6 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .apiInfo(getApiInfo())
                 .securitySchemes(securitySchemes)
                 .securityContexts(securityContexts);
-    }
-
-    private static ApiInfo getApiInfo() {
-        return new ApiInfoBuilder()
-                .title("Openfabric")
-                .version("v1")
-                .build();
     }
 
     private SecurityContext xAuthTokenSecurityContext() {
