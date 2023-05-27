@@ -1,41 +1,28 @@
-# Backend Junior Developer (Intern) Test
+# Docker Manager API in Spring Boot
 
-Welcome! and thank you for applying!
+### Setup
+- Clone the repository
+- Change the variables in `.env` file
+- Open the project in IntelliJ IDEA
+- Run the project using `Application.java`
+- Test the API using Swagger UI (`http://localhost:8080/swagger-ui/#/`), or use curl commands, or any other tool
 
-## Requirement
+### API Endpoints
+- See `http://localhost:8080/swagger-ui/#/` for the API documentation.
 
-Your task is to add the necessary features to the current project's API blueprint structure to enable
-it to manage **Docker** containers, also referred to as workers, as fallows:
+### Features
+- List all workers (pagination supported)
+- Start or stop a worker
+- Get worker details
+- Get worker stats (cpuUsage, memoryUsage, etc.)
 
-🔄 Integrate the 🐳 Docker Java library (https://github.com/docker-java/docker-java/blob/main/docs/getting_started.md) to enable connect and manage 👷‍♀️ workers.
+### Design
+#### Models
+- Worker (id, name, status, stats, etc.)
+- WorkerStatistics (cpuUsage, memoryUsage, networkIn, networkOut, etc.)
 
-➕ Add the required fields and database migration for the 👷‍♂️ Worker entity to keep **all** the information associated on available at the container level (like 🔌 ports, 👨‍💼 name, 🟢 status, etc..)
+All the models are stored in the database.
 
-🆕 Add required entities and tables to track the 👷‍♂️ Worker statistics.
-
-🆙 Update the 👷‍♂️ WorkerController to add actions for:
-* 📄 List workers (paginated)
-* ▶️ Start and ⏹️ Stop worker
-* 🔍 Get worker information
-* 📊 Get worker statistics
-
-## Constraints and restrictions
-
-You are free to use any package or library you see feet as long as you follow these rules:
-
-* 👎 You can't copy and paste from other peoples work
-
-## Run
-
-Once you have established a connection to the database, you can test the application by using Swagger.
-
-You can access Swagger by navigating to the following link: http://localhost:8080/swagger-ui/#/.
-
-## Submission
-
-Your solution must be uploaded on GitHub, and submit us the link in **max 1 week** after receiving the task.
-
-## Note
-
-Keep in mind that this is the project that will be used to evaluate your skills.
-So we do expect you to make sure that the app is fully functional and doesn't have any obvious missing pieces.
+#### Services
+- BackgroundUpdaterService (updates the stats of all workers in the background periodically)
+- DockerAPIService (for communication with the Docker API)

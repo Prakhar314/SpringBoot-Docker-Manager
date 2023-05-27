@@ -1,4 +1,4 @@
-package ai.openfabric.api.component;
+package ai.openfabric.api.service;
 
 import ai.openfabric.api.model.Worker;
 import ai.openfabric.api.model.WorkerStatistics;
@@ -6,6 +6,7 @@ import ai.openfabric.api.repository.WorkerRepository;
 import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.ListContainersCmd;
 import com.github.dockerjava.api.command.StatsCmd;
+import com.github.dockerjava.api.exception.InternalServerErrorException;
 import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.Statistics;
 import org.slf4j.Logger;
@@ -26,17 +27,24 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * A component that runs in the background to update the database periodically
+ */
 @Component
-public class BackgroundUpdateThreadComponent {
+public class BackgroundUpdateService {
 
-    public static final int UPDATE_INTERVAL = 2000;
+    public static final int UPDATE_INTERVAL = 2000;  // 2 seconds
     @Autowired
     private WorkerRepository workerRepository;
+
+    @Autowired
+    private DockerAPIService dockerAPIService;
 
     private ScheduledExecutorService executorService;
 
     @PostConstruct
     public void init() {
+        // start a thread to update the database periodically
         executorService = Executors.newSingleThreadScheduledExecutor();
         executorService.scheduleAtFixedRate(this::updateDB, 0, UPDATE_INTERVAL, TimeUnit.MILLISECONDS);
     }
@@ -46,10 +54,13 @@ public class BackgroundUpdateThreadComponent {
         executorService.shutdown();
     }
 
+    /**
+     * Update the database with the latest information from Docker Engine API
+     */
     @Transactional
     private void updateDB() {
-        Logger logger = LoggerFactory.getLogger(BackgroundUpdateThreadComponent.class);
-        try (ListContainersCmd listContainersCmd = DockerAPIService.getClient().listContainersCmd()) {
+        Logger logger = LoggerFactory.getLogger(BackgroundUpdateService.class);
+        try (ListContainersCmd listContainersCmd = dockerAPIService.getClient().listContainersCmd()) {
             List<Container> containers = listContainersCmd.withShowAll(true).exec();
 
             try {
@@ -63,7 +74,7 @@ public class BackgroundUpdateThreadComponent {
                     DockerAPIService.extractInfo(container, worker);
 
                     // get stats in callback
-                    try (StatsCmd statsCmd = DockerAPIService.getClient().statsCmd(worker.getId())) {
+                    try (StatsCmd statsCmd = dockerAPIService.getClient().statsCmd(worker.getId())) {
 
                         statsCmd.withNoStream(true).exec(new ResultCallback<Statistics>() {
                             @Override
@@ -107,6 +118,10 @@ public class BackgroundUpdateThreadComponent {
             } catch (InterruptedException e) {
                 throw new RuntimeException("Uncaught InterruptedException", e);
             }
+        }
+        catch (InternalServerErrorException e){
+            // Docker API failed, try again next time
+            return;
         }
     }
 }

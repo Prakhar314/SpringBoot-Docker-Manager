@@ -46,10 +46,12 @@ public class Worker extends Datable implements Serializable {
         if (ports.length() == 0) {
             return Collections.emptyList();
         }
+        // from comma separated list of ports to list of integers
         return Arrays.stream(ports.split(",")).map(Integer::parseInt).collect(Collectors.toList());
     }
 
     public void setPorts(List<Integer> ports) {
+        // to comma separated list of ports
         this.ports = ports.stream().map(Object::toString).collect(Collectors.joining(","));
     }
 }
