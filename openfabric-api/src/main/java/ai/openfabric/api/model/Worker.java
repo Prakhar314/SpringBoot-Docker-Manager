@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class Worker extends Datable implements Serializable {
 
     @Id
+    @Column(columnDefinition = "character varying(255)")
     private String id;
 
     private String name;

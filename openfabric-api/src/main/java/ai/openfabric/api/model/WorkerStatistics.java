@@ -16,7 +16,7 @@ import javax.persistence.*;
 public class WorkerStatistics extends Datable {
 
     @Id
-    @Column(name = "worker_id")
+    @Column(name = "worker_id", columnDefinition = "character varying(255)")
     private String id;
 
     private float cpuUsage;
@@ -25,7 +25,7 @@ public class WorkerStatistics extends Datable {
     private float networkOut;
     private float blockIn;
     private float blockOut;
-    private int pidCount;
+    private long pidCount;
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId

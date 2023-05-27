@@ -4,6 +4,10 @@ import ai.openfabric.api.component.DockerAPIService;
 import ai.openfabric.api.model.Worker;
 import ai.openfabric.api.model.WorkerStatistics;
 import ai.openfabric.api.repository.WorkerRepository;
+import com.github.dockerjava.api.command.StartContainerCmd;
+import com.github.dockerjava.api.command.StopContainerCmd;
+import com.github.dockerjava.api.exception.NotFoundException;
+import com.github.dockerjava.api.exception.NotModifiedException;
 import com.github.dockerjava.transport.DockerHttpClient;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -30,9 +34,6 @@ public class WorkerController {
     @Autowired
     private WorkerRepository workerRepository;
 
-    @Autowired
-    private DockerAPIService dockerAPIService;
-
     @ApiOperation(value = "List all the workers", notes = "Returns id, name, state and status of all the workers")
     @GetMapping(path = "/workers")
     public @ResponseBody Page<WorkerRepository.BasicWorkerInfo> getWorkers(@RequestParam(required = false) Integer pageIndex, @RequestParam(required = false) Integer pageSize) {
@@ -49,45 +50,50 @@ public class WorkerController {
 
     @ApiOperation("Stop a worker")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Worker stopped"),
+            @ApiResponse(code = 200, message = "Worker stopped"),
             @ApiResponse(code = 304, message = "Worker already stopped"),
-            @ApiResponse(code = 404, message = "Worker not found"),
-            @ApiResponse(code = 500, message = "Internal server error")
+            @ApiResponse(code = 404, message = "Worker not found")
     })
     @PostMapping(path = "/workers/{id}/stop")
     public @ResponseBody ResponseEntity<String> stopWorker(@PathVariable String id) {
-        ResponseEntity<String> responseEntity;
-        try (DockerHttpClient.Response response = dockerAPIService.post("/containers/" + id + "/stop")) {
-            String responseString = new BufferedReader(new InputStreamReader(response.getBody()))
-                    .lines()
-                    .collect(Collectors.joining("\n"));
-            responseEntity = ResponseEntity.status(response.getStatusCode()).body(responseString);
+        try (StopContainerCmd cmd = DockerAPIService.getClient().stopContainerCmd(id)) {
+            try {
+                cmd.exec();
+            }
+            catch (NotFoundException e) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Worker not found");
+            }
+            catch (NotModifiedException e){
+                return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Worker already stopped");
+            }
         }
-        return responseEntity;
+        return ResponseEntity.status(HttpStatus.OK).body("Worker stopped");
     }
 
     @ApiOperation("Start a worker")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Worker started"),
+            @ApiResponse(code = 200, message = "Worker started"),
             @ApiResponse(code = 304, message = "Worker already started"),
-            @ApiResponse(code = 404, message = "Worker not found"),
-            @ApiResponse(code = 500, message = "Internal server error")
+            @ApiResponse(code = 404, message = "Worker not found")
     })
     @PostMapping(path = "/workers/{id}/start")
     public @ResponseBody ResponseEntity<String> startWorker(@PathVariable String id) {
-        ResponseEntity<String> responseEntity;
-        try (DockerHttpClient.Response response = dockerAPIService.post("/containers/" + id + "/start")) {
-            String responseString = new BufferedReader(new InputStreamReader(response.getBody()))
-                    .lines()
-                    .collect(Collectors.joining("\n"));
-            responseEntity = ResponseEntity.status(response.getStatusCode()).body(responseString);
+        try (StartContainerCmd cmd = DockerAPIService.getClient().startContainerCmd(id)) {
+            try {
+                cmd.exec();
+            }
+            catch (NotFoundException e) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Worker not found");
+            }
+            catch (NotModifiedException e){
+                return ResponseEntity.status(HttpStatus.NOT_MODIFIED).body("Worker already started");
+            }
         }
-        return responseEntity;
+        return ResponseEntity.status(HttpStatus.OK).body("Worker started");
     }
 
     @ApiOperation("Get more info about a worker")
     @ApiResponses(value = {
-            @ApiResponse(code = 204, message = "Worker statistics"),
             @ApiResponse(code = 404, message = "Worker not found")
     })
     @GetMapping(path = "/workers/{id}/info")
