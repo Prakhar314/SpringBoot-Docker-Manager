@@ -33,7 +33,7 @@
     <!-- ############################################################ -->
     <changeSet id="WO_01" author="andrei">
         <createTable tableName="worker" remarks="Worker table">
-            <column name="id" type="${uuid_type}" defaultValueComputed="${uuid_function}">
+            <column name="id" type="varchar(255)">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
             <column name="name" type="varchar(255)"/>
@@ -41,6 +41,32 @@
             <column name="created_at" type="DATETIME"/>
             <column name="updated_at" type="DATETIME"/>
             <column name="deleted_at" type="DATETIME"/>
+        </createTable>
+    </changeSet>
+    
+    <changeSet id="WO_02" author="prakhar">
+        <addColumn tableName="worker">
+            <column name="ports" type="varchar(255)"/>
+            <column name="status" type="varchar(255)"/>
+            <column name="state" type="varchar(255)"/>
+            <column name="image" type="varchar(255)"/>
+            <column name="imageId" type="varchar(255)"/>
+            <column name="command" type="varchar(255)"/>
+            <column name="created" type="DATETIME"/>
+        </addColumn>
+        
+        <createTable tableName="worker_statistics">
+            <column name="worker_id" type="varchar(255)">
+                <constraints nullable="false" primaryKey="true" foreignKeyName="fk_worker_statistics_worker" references="worker(id)" deleteCascade="true"/>
+            </column>
+
+            <column name="cpuUsage" type="float"/>
+            <column name="memoryUsage" type="bigint"/>
+            <column name="networkIn" type="bigint"/>
+            <column name="networkOut" type="bigint"/>
+            <column name="blockIn" type="bigint"/>
+            <column name="blockOut" type="bigint"/>
+            <column name="pidCount" type="bigint"/>
         </createTable>
     </changeSet>
 
