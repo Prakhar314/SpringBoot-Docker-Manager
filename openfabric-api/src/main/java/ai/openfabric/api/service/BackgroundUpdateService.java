@@ -58,7 +58,7 @@ public class BackgroundUpdateService {
      * Update the database with the latest information from Docker Engine API
      */
     @Transactional
-    private void updateDB() {
+    public void updateDB() {
         Logger logger = LoggerFactory.getLogger(BackgroundUpdateService.class);
         try (ListContainersCmd listContainersCmd = dockerAPIService.getClient().listContainersCmd()) {
             List<Container> containers = listContainersCmd.withShowAll(true).exec();
@@ -113,15 +113,19 @@ public class BackgroundUpdateService {
                     workers.add(worker);
                 });
                 // wait till callbacks finish
-                latch.await();
+                boolean finished = latch.await(5, TimeUnit.SECONDS);
+                if (!finished) {
+                    logger.warn("Timeout waiting for callbacks to finish");
+                    return;
+                }
                 workerRepository.saveAll(workers);
             } catch (InterruptedException e) {
                 throw new RuntimeException("Uncaught InterruptedException", e);
             }
-        }
-        catch (InternalServerErrorException e){
+        } catch (InternalServerErrorException e) {
             // Docker API failed, try again next time
-            return;
+        } catch (Exception e) {
+            throw new RuntimeException("Uncaught exception", e);
         }
     }
 }

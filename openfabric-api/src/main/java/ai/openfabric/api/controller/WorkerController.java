@@ -14,7 +14,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +38,11 @@ public class WorkerController {
 
     @ApiOperation(value = "List all the workers", notes = "Returns id, name, state and status of all the workers")
     @GetMapping(path = "/")
-    public @ResponseBody Page<WorkerRepository.BasicWorkerInfo> getWorkers(@RequestParam(required = false) Integer pageIndex, @RequestParam(required = false) Integer pageSize) {
+    public @ResponseBody Page<WorkerRepository.BasicWorkerInfo> getWorkers(
+            @RequestParam(required = false) Integer pageIndex,
+            @RequestParam(required = false) Integer pageSize,
+            @RequestParam(required = false) String sortField,
+            @RequestParam(required = false) Boolean sortAsc) {
         // default values
         if (pageIndex == null) {
             pageIndex = 0;
@@ -44,7 +50,13 @@ public class WorkerController {
         if (pageSize == null || pageSize <= 0) {
             pageSize = 10;
         }
-        Pageable pageable = Pageable.ofSize(pageSize).withPage(pageIndex);
+        if (sortField == null) {
+            sortField = "id";
+        }
+        if (sortAsc == null) {
+            sortAsc = true;
+        }
+        Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.by(sortAsc ? Sort.Direction.ASC : Sort.Direction.DESC, sortField));
 
         // return minimal info
         return workerRepository.findAllMinimal(pageable);

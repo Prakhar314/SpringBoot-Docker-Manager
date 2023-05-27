@@ -9,10 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Getter
@@ -43,7 +40,7 @@ public class Worker extends Datable implements Serializable {
     private WorkerStatistics workerStatistics;
 
     public List<Integer> getPorts() {
-        if (ports.length() == 0) {
+        if (ports.isEmpty()) {
             return Collections.emptyList();
         }
         // from comma separated list of ports to list of integers
@@ -52,6 +49,6 @@ public class Worker extends Datable implements Serializable {
 
     public void setPorts(List<Integer> ports) {
         // to comma separated list of ports
-        this.ports = ports.stream().map(Object::toString).collect(Collectors.joining(","));
+        this.ports = ports.stream().filter(Objects::nonNull).map(Object::toString).collect(Collectors.joining(","));
     }
 }

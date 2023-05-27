@@ -50,7 +50,7 @@
             <column name="status" type="varchar(255)"/>
             <column name="state" type="varchar(255)"/>
             <column name="image" type="varchar(255)"/>
-            <column name="imageId" type="varchar(255)"/>
+            <column name="image_id" type="varchar(255)"/>
             <column name="command" type="varchar(255)"/>
             <column name="created" type="DATETIME"/>
         </addColumn>
@@ -60,13 +60,17 @@
                 <constraints nullable="false" primaryKey="true" foreignKeyName="fk_worker_statistics_worker" references="worker(id)" deleteCascade="true"/>
             </column>
 
-            <column name="cpuUsage" type="float"/>
-            <column name="memoryUsage" type="bigint"/>
-            <column name="networkIn" type="bigint"/>
-            <column name="networkOut" type="bigint"/>
-            <column name="blockIn" type="bigint"/>
-            <column name="blockOut" type="bigint"/>
-            <column name="pidCount" type="bigint"/>
+            <column name="created_at" type="DATETIME"/>
+            <column name="updated_at" type="DATETIME"/>
+            <column name="deleted_at" type="DATETIME"/>
+
+            <column name="cpu_usage" type="float"/>
+            <column name="memory_usage" type="bigint"/>
+            <column name="network_in" type="bigint"/>
+            <column name="network_out" type="bigint"/>
+            <column name="block_in" type="bigint"/>
+            <column name="block_out" type="bigint"/>
+            <column name="pid_count" type="bigint"/>
         </createTable>
     </changeSet>
 

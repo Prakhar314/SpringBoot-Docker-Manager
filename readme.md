@@ -13,7 +13,7 @@
 - See `http://localhost:8080/swagger-ui/#/` for the API documentation.
 
 ### Features
-- List all workers (pagination supported)
+- List all workers (pagination and sorting supported)
 - Start or stop a worker
 - Get worker details
 - Get worker stats (cpuUsage, memoryUsage, etc.)
