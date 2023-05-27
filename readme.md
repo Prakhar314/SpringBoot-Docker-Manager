@@ -7,6 +7,8 @@
 - Run the project using `Application.java`
 - Test the API using Swagger UI (`http://localhost:8080/swagger-ui/#/`), or use curl commands, or any other tool
 
+**Note**: If you do not have an API listening on port 2375, you can look here for instructions on how to set it up: https://gist.github.com/styblope/dc55e0ad2a9848f2cc3307d4819d819f
+
 ### API Endpoints
 - See `http://localhost:8080/swagger-ui/#/` for the API documentation.
 
